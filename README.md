@@ -172,15 +172,15 @@ Admins can also run billing manually from the Invoices page.
 
 ## Deploy on Vercel
 
-The repository contains two Vercel projects. Import the same GitHub repository twice and set the **Root Directory** to `backend` for the API and `frontend` for the web app.
+Import the repository as one Vercel project and choose **Services** as the application preset. The root [`vercel.json`](vercel.json) builds `backend` and `frontend` as separate services, routes `/api/*` to Express, and sends all other paths to the Vite app. Both services share one production domain, so the browser API calls and refresh-token cookie stay same-origin. Do not set a separate Root Directory in the Vercel project.
 
 ### 1. Create the production database
 
-Connect a managed PostgreSQL database to the backend Vercel project. The Prisma Postgres Vercel integration provides a direct `DATABASE_URL` for migrations and a pooled `DATABASE_URL_POOLED` for serverless requests. The API uses the pooled URL when it is available and falls back to `DATABASE_URL` for local development.
+Connect a managed PostgreSQL database to the Vercel project. The Prisma Postgres Vercel integration provides a direct `DATABASE_URL` for migrations and a pooled `DATABASE_URL_POOLED` for serverless requests. The API uses the pooled URL when it is available and falls back to `DATABASE_URL` for local development.
 
-### 2. Configure the API project
+### 2. Configure the backend service
 
-Set these Production environment variables in the backend project:
+Set these Production environment variables in the Vercel project:
 
 | Variable | Value |
 | --- | --- |
@@ -189,20 +189,20 @@ Set these Production environment variables in the backend project:
 | `JWT_ACCESS_SECRET` | New random secret, at least 32 characters |
 | `JWT_REFRESH_SECRET` | A different new random secret, at least 32 characters |
 | `CRON_SECRET` | New random secret, at least 32 characters |
-| `FRONTEND_URL` | The frontend's production URL |
-| `APP_URL` | The frontend's production URL |
-| `PASSWORD_RESET_URL` | `<frontend-url>/reset-password` |
+| `FRONTEND_URL` | The Vercel production URL, e.g. `https://your-project.vercel.app` |
+| `APP_URL` | The same Vercel production URL |
+| `PASSWORD_RESET_URL` | `<production-url>/reset-password` |
 | `COOKIE_SECURE` | `true` |
-| `COOKIE_SAME_SITE` | `lax` when API calls use the frontend proxy described below |
+| `COOKIE_SAME_SITE` | `lax` for the same-origin frontend and API |
 | `NODE_ENV` | `production` |
 
 SMTP and Razorpay variables are optional. Use production credentials only when those integrations are enabled. Do not add local `.env` files or the recovered PGlite data directory to Vercel.
 
-The backend build runs `prisma generate`. After the database is connected, link the backend directory to its Vercel project and apply schema migrations once using the direct production database URL stored in Vercel:
+The backend build runs `prisma generate`. After the database is connected, link the repository to the Vercel project and apply schema migrations once using the direct production database URL stored in Vercel:
 
 ```sh
+vercel link --project <project-name>
 cd backend
-vercel link --project <backend-project-name>
 vercel env run --environment=production -- npm run prisma:deploy
 ```
 
@@ -214,27 +214,18 @@ vercel env run --environment=production -- npm run bootstrap:admin
 
 Remove those three bootstrap variables after it succeeds. The script refuses to run if an admin already exists. Do not run the demo seed in production.
 
-The protected `/api/cron/daily` endpoint runs expiry, billing, overdue, renewal, and payment-retry jobs in order. `backend/vercel.json` schedules it once per day at 19:00 UTC (00:30 India time) and secures it with `CRON_SECRET`. Vercel Hobby may invoke a daily cron at any time during its scheduled hour; the function has a 300-second maximum duration.
+The protected `/api/cron/daily` endpoint runs expiry, billing, overdue, renewal, and payment-retry jobs in order. `vercel.json` schedules it once per day at 19:00 UTC (00:30 India time) and secures it with `CRON_SECRET`. Vercel Hobby may invoke a daily cron at any time during its scheduled hour; the backend function has a 300-second maximum duration.
 
-### 3. Configure the frontend project
+### 3. Configure the frontend service
 
-Vercel detects Vite automatically. Use `npm run build` and `dist` if the project settings ask for build values. Set these Production environment variables:
+Vercel detects Vite automatically. The frontend service has an SPA fallback for deep links such as `/home` and `/reset-password`. Set these Production environment variables:
 
 | Variable | Value |
 | --- | --- |
 | `VITE_API_URL` | `/api/v1` |
-| `VITE_APP_URL` | The frontend's production URL |
+| `VITE_APP_URL` | The Vercel production URL |
 
-After the API deployment has a stable production URL, add an external rewrite **before** the SPA fallback in `frontend/vercel.json`:
-
-```json
-{
-  "source": "/api/v1/:path*",
-  "destination": "https://<backend-project>.vercel.app/api/v1/:path*"
-}
-```
-
-The existing fallback rewrite serves the React app on deep links such as `/home` and `/reset-password`. The API proxy keeps browser API calls and refresh cookies on the frontend origin. Redeploy the frontend after adding the rewrite and environment variables.
+Because frontend variables are embedded during the build, set them before the production deployment or redeploy after changing them.
 
 ## Build and production notes
 
