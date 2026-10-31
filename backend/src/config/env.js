@@ -6,6 +6,7 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  CRON_SECRET: z.preprocess((value) => value === '' ? undefined : value, z.string().min(32, 'CRON_SECRET must contain at least 32 characters').optional()),
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must contain at least 32 characters'),
   JWT_REFRESH_SECRET: z.string().min(32, 'JWT_REFRESH_SECRET must contain at least 32 characters'),
   ACCESS_TOKEN_TTL: z.string().regex(/^\d+[smhd]$/, 'ACCESS_TOKEN_TTL must use s, m, h, or d units').default('15m'),

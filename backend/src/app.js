@@ -17,6 +17,7 @@ import { settingsRouter } from './routes/settings.routes.js';
 import { notificationsRouter } from './routes/notifications.routes.js';
 import { auditRouter } from './routes/audit.routes.js';
 import { demoRouter } from './routes/demo.routes.js';
+import { cronRouter } from './routes/cron.routes.js';
 import { razorpayWebhook } from './controllers/payments.controller.js';
 
 export const app = express();
@@ -43,6 +44,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
+app.use('/api/cron', cronRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/customers', customersRouter);
@@ -88,3 +90,5 @@ app.use((error, _req, res, _next) => {
   if (statusCode >= 500) console.error(error);
   res.status(statusCode).json({ success: false, data: null, message, ...(error.details ? { details: error.details } : {}) });
 });
+
+export default app;
