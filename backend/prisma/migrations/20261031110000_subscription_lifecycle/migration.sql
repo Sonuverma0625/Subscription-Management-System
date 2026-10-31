@@ -8,3 +8,4 @@ CREATE TABLE "NumberSequence" (
 
     CONSTRAINT "NumberSequence_pkey" PRIMARY KEY ("key")
 );
+

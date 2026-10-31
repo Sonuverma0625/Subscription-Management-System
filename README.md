@@ -55,7 +55,7 @@ cd backend
 npm run db:dev
 ```
 
-PGlite listens on `127.0.0.1:5433` and stores its development data in `backend/.local-postgres-recovered/`.
+PGlite listens on `127.0.0.1:5433` and stores its development data in `backend/.local-postgres-session/`.
 
 ### Migrate, seed, and start the API
 
