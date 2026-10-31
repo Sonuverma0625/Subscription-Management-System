@@ -1,0 +1,44 @@
+{
+  "name": "brightloop-subscription-api",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
+    "db:dev": "pglite-server --db=./.local-postgres-session --port=5433 --host=127.0.0.1 --max-connections=5",
+    "prisma:generate": "prisma generate",
+    "prisma:seed": "node prisma/seed.js",
+    "prisma:seed:large": "node prisma/seed.js --large",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.18.0",
+    "bcrypt": "^6.0.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
+    "node-cron": "^4.2.1",
+    "nodemailer": "^7.0.10",
+    "pdfkit": "^0.17.2",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite-socket": "^0.2.16",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.18.0"
+  },
+  "allowScripts": {
+    "@prisma/client@6.19.3": true,
+    "bcrypt@6.0.0": true,
+    "prisma@6.19.3": true,
+    "@prisma/engines@6.19.3": true
+  }
+}
