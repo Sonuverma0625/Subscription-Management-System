@@ -7,3 +7,5 @@ dist/
 coverage/
 npm-debug.log*
 backend/local-postgres/
+
+.vercel

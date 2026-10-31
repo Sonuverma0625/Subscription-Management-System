@@ -22,6 +22,10 @@ import { razorpayWebhook } from './controllers/payments.controller.js';
 
 export const app = express();
 
+// Vercel forwards the originating client IP through one trusted proxy hop.
+// This lets express-rate-limit key auth attempts per client instead of throwing
+// on the forwarded headers (or accidentally sharing one limit across everyone).
+app.set('trust proxy', 1);
 app.disable('x-powered-by');
 app.use(helmet({ contentSecurityPolicy: { directives: {
   defaultSrc: ["'self'"],
