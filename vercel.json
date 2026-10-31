@@ -4,6 +4,7 @@
     "backend": {
       "root": "backend",
       "framework": "express",
+      "buildCommand": "npm run build",
       "functions": {
         "src/app.js": {
           "maxDuration": 300
