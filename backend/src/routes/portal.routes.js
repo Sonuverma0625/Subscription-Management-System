@@ -1,0 +1,26 @@
+import { Router } from 'express';
+import { authenticate } from '../middleware/auth.js';
+import { requireRoles } from '../middleware/role.js';
+import { validate } from '../middleware/validate.js';
+import { customerCancelSubscription, customerChangePlan, customerPauseSubscription, customerRenewSubscription, customerResumeSubscription, listCustomerPlans, portalSummary } from '../controllers/portal.controller.js';
+import { transitionParamsSchema } from '../validators/subscriptions.validators.js';
+import { listSubscriptions } from '../controllers/subscriptions.controller.js';
+import { listInvoices } from '../controllers/invoices.controller.js';
+import { listPayments } from '../controllers/payments.controller.js';
+import { subscriptionListQuerySchema } from '../validators/subscriptions.validators.js';
+import { invoiceListQuerySchema } from '../validators/invoices.validators.js';
+import { paymentListQuerySchema } from '../validators/payments.validators.js';
+import { z } from 'zod';
+
+export const portalRouter = Router();
+portalRouter.use(authenticate, requireRoles('CUSTOMER'));
+portalRouter.get('/summary', portalSummary);
+portalRouter.get('/plans', listCustomerPlans);
+portalRouter.get('/subscriptions', validate(subscriptionListQuerySchema, 'query'), listSubscriptions);
+portalRouter.get('/invoices', validate(invoiceListQuerySchema, 'query'), listInvoices);
+portalRouter.get('/payments', validate(paymentListQuerySchema, 'query'), listPayments);
+portalRouter.post('/subscriptions/:id/pause', validate(transitionParamsSchema, 'params'), customerPauseSubscription);
+portalRouter.post('/subscriptions/:id/resume', validate(transitionParamsSchema, 'params'), customerResumeSubscription);
+portalRouter.post('/subscriptions/:id/renew', validate(transitionParamsSchema, 'params'), customerRenewSubscription);
+portalRouter.post('/subscriptions/:id/cancel', validate(transitionParamsSchema, 'params'), customerCancelSubscription);
+portalRouter.post('/subscriptions/:id/change-plan', validate(transitionParamsSchema, 'params'), validate(z.object({ planId: z.string().min(1).max(64).nullable() })), customerChangePlan);
