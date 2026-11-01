@@ -9,7 +9,7 @@ import {
   reset,
 } from '../controllers/auth.controller.js';
 import { authenticate } from '../middleware/auth.js';
-import { authRateLimit, sessionRateLimit } from '../middleware/rateLimit.js';
+import { authRateLimit, loginRateLimit, sessionRateLimit } from '../middleware/rateLimit.js';
 import { validate } from '../middleware/validate.js';
 import {
   forgotPasswordSchema,
@@ -22,7 +22,7 @@ import {
 export const authRouter = Router();
 
 authRouter.post('/register', authRateLimit, validate(registerSchema), register);
-authRouter.post('/login', authRateLimit, validate(loginSchema), login);
+authRouter.post('/login', loginRateLimit, validate(loginSchema), login);
 authRouter.post('/logout', sessionRateLimit, logout);
 authRouter.post('/refresh', sessionRateLimit, refresh);
 authRouter.post('/forgot-password', authRateLimit, validate(forgotPasswordSchema), forgotPassword);
