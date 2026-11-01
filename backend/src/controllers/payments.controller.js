@@ -91,7 +91,10 @@ export const recordPayment = asyncHandler(async (req, res) => {
     await writeAuditLog(tx, { userId: req.user.id, action: 'PAYMENT_RECORDED', entity: 'Payment', entityId: created.id, details: { invoice: invoice.number, amount: amount.toString(), method: req.body.method } });
     return created;
   });
-  void sendReceipt(payment, payment.invoice.customer.user.name, payment.invoice.customer.user.email);
+  const isAdminDemoSample = req.user.role === 'ADMIN' && /^\[DEMO SAMPLE\]/i.test(req.body.note || '');
+  if (!isAdminDemoSample) {
+    void sendReceipt(payment, payment.invoice.customer.user.name, payment.invoice.customer.user.email);
+  }
   return res.status(201).json({ success: true, data: { payment }, message: 'Payment recorded.' });
 });
 
