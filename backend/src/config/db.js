@@ -17,6 +17,12 @@ export const prisma = new PrismaClient({
   datasources: {
     db: { url: getRuntimeDatabaseUrl() },
   },
+  // Hosted PostgreSQL can respond more slowly during cold starts; keep
+  // multi-query interactive transactions atomic without the 5s default cutoff.
+  transactionOptions: {
+    maxWait: 10000,
+    timeout: 15000,
+  },
   log: process.env.NODE_ENV === 'development' ? ['warn', 'error'] : ['error'],
 });
 
